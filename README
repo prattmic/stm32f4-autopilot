@@ -1,0 +1,5 @@
+This project is based on jeremyherbert's stm32-templates, found at https://github.com/jeremyherbert/stm32-templates.  He did a great job getting a working platform for the STM32F4-Discovery, but we want to simplify things a bit.
+
+The goal is to create a base for the STM32F4-Discovery that does not require so many of STM's library, using our own startup file and reducing dependency on extra libraries.
+
+This project will only focus on the STM32F4, so all STM32VL files have been removed.
