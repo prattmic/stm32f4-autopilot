@@ -1,5 +1,1 @@
-This project is based on jeremyherbert's stm32-templates, found at https://github.com/jeremyherbert/stm32-templates.  He did a great job getting a working platform for the STM32F4-Discovery, but we want to simplify things a bit.
-
-The goal is to create a base for the STM32F4-Discovery that does not require so many of STM's library, using our own startup file and reducing dependency on extra libraries.
-
-This project will only focus on the STM32F4, so all STM32VL files have been removed.
+The goal of this project is to build an autopilot on the STM32F4-Discovery platform.  We will be building upon the base provided by https://github.com/prattmic/stm32f4-templates and are basing the autopilot around the system described in "Small Unmanned Aircraft: Theory and Practice" by Randal Beard and Timothy McLain.

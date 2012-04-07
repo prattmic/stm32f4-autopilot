@@ -1,5 +1,7 @@
 /* Michael Pratt <michael@pratt.im>
- * Vastly simplified the code from https://github.com/jeremyherbert/stm32-templates/ */
+ * Simplified code from https://github.com/jeremyherbert/stm32-templates/
+ * Building the Autopilot described in Small Unmanned Aircraft by Beard
+ * Rev. Chapter 6 */
 
 typedef unsigned long uint32_t;
 
@@ -11,6 +13,8 @@ typedef unsigned long uint32_t;
 #define LED_ODR     *(volatile uint32_t *) (GPIOD + 0x14)   /* LED Output Data Register */
 
 void Delay(volatile uint32_t nCount);
+
+float pidloop(float y_c, float y, uint32_t flag, float kp, float ki, float kd, float limit, float Ts, float tau);
 
 int main(void) {
 
@@ -26,14 +30,52 @@ int main(void) {
         /* Toggle LEDs */
         LED_ODR ^= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
-        Delay(5000000);
+        Delay(10000000);
     }
 }
 
 void Delay(volatile uint32_t nCount) {
-  float one;
-  while(nCount--)
-  {
-      one = (float) nCount*3.141592f;
-  }
+    /* Simulate wind-up */
+    float limit = nCount;
+    volatile float result = pidloop(100, 0, 1, 1, 1, 1, limit, 1, 1);     /* Reset values */
+
+    while(result != limit && result != -limit) {
+        result = pidloop(100, 0, 0, 1, 1, 1, limit, 1, 1);
+    }
 }
+
+/* Vars for pidloop */
+volatile float integrator;
+volatile float differentiator;
+volatile float error_d1;        /* Previous error */
+
+float pidloop(float y_c, float y, uint32_t flag, float kp, float ki, float kd, float limit, float Ts, float tau) {
+    float error;
+    float u;
+
+    if (flag) {     /* Reset values */
+        integrator = 0;
+        differentiator = 0;
+        error_d1 = 0;
+    }
+
+    error = y_c - y;        /* Commanded - Actual */
+    integrator = integrator + (Ts/2) * (error + error_d1);      /* Equation 6.29 */
+    differentiator = (2*tau-Ts)/(2*tau+Ts) * differentiator + 2/(2*tau+Ts) * (error - error_d1);        /* Equation 6.30 */
+
+    error_d1 = error;
+
+    u = kp*error + ki*integrator + kd*differentiator;       /* See pg. 116 */
+
+    /* abs(u) <= limit must be true */
+    if (u > limit) {
+        return limit;
+    }
+    else if (u < -limit) {
+        return -limit;
+    }
+    else {
+        return u;
+    }
+}
+
