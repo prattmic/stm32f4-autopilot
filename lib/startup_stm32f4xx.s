@@ -29,6 +29,11 @@
   * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
   */
+
+/*******************************************************************************
+  If you need C++, search for "__libc_init_array" and uncomment that line!
+  It is required for C++ support!
+  */
     
   .syntax unified
   .cpu cortex-m3
@@ -95,8 +100,10 @@ LoopFillZerobss:
 
 /* Call the clock system intitialization function.*/
   bl  SystemInit   
-/* Call static constructors */
-    bl __libc_init_array
+
+/* Call static constructors - Required for C++ support */
+/* bl __libc_init_array */
+
 /* Call the application's entry point.*/
   bl  main
   bx  lr    
