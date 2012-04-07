@@ -12,9 +12,29 @@ typedef unsigned long uint32_t;
 #define GPIOD_MODER *(volatile uint32_t *) (GPIOD + 0x00)   /* Port D mode register */
 #define LED_ODR     *(volatile uint32_t *) (GPIOD + 0x14)   /* LED Output Data Register */
 
+/* Structures */
+struct pidsettings {
+    float kp;
+    float ki;
+    float kd;
+    float Ts;
+    float tau;
+    float upper_limit;
+    float lower_limit;
+    volatile float *integrator;
+    volatile float *differentiator;
+    volatile float *error_d1;
+};
+
 void Delay(volatile uint32_t nCount);
 
-float pidloop(float y_c, float y, uint32_t flag, float kp, float ki, float kd, float limit, float Ts, float tau);
+/* Generic Function */
+float pid_loop(volatile float *integrator, volatile float *differentiator, volatile float *error_d1, float y_c, float y, float kp, float ki, float kd, float Ts, float tau, float upper_limit, float lower_limit);
+void reset_pid(struct pidsettings *settings);
+float sat(float in, float upper_limit, float lower_limit);
+
+/* Autopilot Functions */
+float airspeed_with_pitch_hold(float Va_c, float Va, struct pidsettings *settings, uint32_t reset);
 
 int main(void) {
 
@@ -30,52 +50,81 @@ int main(void) {
         /* Toggle LEDs */
         LED_ODR ^= (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
-        Delay(10000000);
+        Delay(100000000);
     }
 }
 
 void Delay(volatile uint32_t nCount) {
     /* Simulate wind-up */
-    float limit = nCount;
-    volatile float result = pidloop(100, 0, 1, 1, 1, 1, limit, 1, 1);     /* Reset values */
+    volatile float result = 0;
+    float integr, diff, old_err;
+    struct pidsettings testpid;
+    testpid.kp = 3.14;
+    testpid.ki = 3.14;
+    testpid.kd = 3.14;
+    testpid.Ts = 3.14;
+    testpid.tau = 3.14;
+    testpid.upper_limit = nCount;
+    testpid.lower_limit = -(signed long)nCount;
+    testpid.integrator = &integr;
+    testpid.differentiator = &diff;
+    testpid.error_d1 = &old_err;
 
-    while(result != limit && result != -limit) {
-        result = pidloop(100, 0, 0, 1, 1, 1, limit, 1, 1);
+    reset_pid(&testpid);
+
+    while(result != nCount && result != -(signed long)nCount) {
+        result = pid_loop(testpid.integrator, testpid.differentiator, testpid.error_d1, 100, 0, testpid.kp, testpid.ki, testpid.kd, testpid.Ts, testpid.tau, testpid.upper_limit, testpid.lower_limit);
     }
 }
 
-/* Vars for pidloop */
-volatile float integrator;
-volatile float differentiator;
-volatile float error_d1;        /* Previous error */
-
-float pidloop(float y_c, float y, uint32_t flag, float kp, float ki, float kd, float limit, float Ts, float tau) {
+/* Generic PID function */
+float pid_loop(volatile float *integrator, volatile float *differentiator, volatile float *error_d1, float y_c, float y, float kp, float ki, float kd, float Ts, float tau, float upper_limit, float lower_limit) {
     float error;
     float u;
-
-    if (flag) {     /* Reset values */
-        integrator = 0;
-        differentiator = 0;
-        error_d1 = 0;
-    }
+    float u_sat;
 
     error = y_c - y;        /* Commanded - Actual */
-    integrator = integrator + (Ts/2) * (error + error_d1);      /* Equation 6.29 */
-    differentiator = (2*tau-Ts)/(2*tau+Ts) * differentiator + 2/(2*tau+Ts) * (error - error_d1);        /* Equation 6.30 */
+    *integrator = *integrator + (Ts/2) * (error + *error_d1);      /* Equation 6.29 */
+    *differentiator = (2*tau-Ts)/(2*tau+Ts) * *differentiator + 2/(2*tau+Ts) * (error - *error_d1);        /* Equation 6.30 */
 
-    error_d1 = error;
+    *error_d1 = error;
 
-    u = kp*error + ki*integrator + kd*differentiator;       /* See pg. 116 */
+    u = kp * error + ki * *integrator + kd * *differentiator;       /* See pg. 116 */
 
     /* abs(u) <= limit must be true */
-    if (u > limit) {
-        return limit;
+    u_sat = sat(u, upper_limit, lower_limit);
+
+    /* Anti-windup scheme suggested by autopilot.m from http://uavbook.byu.edu/doku.php?id=project#chapter_6_-_autopilot_design */
+    if (ki != 0) {
+        *integrator = *integrator + Ts/ki * (u_sat - u);
     }
-    else if (u < -limit) {
-        return -limit;
+
+    return u_sat;
+}
+
+void reset_pid(struct pidsettings *settings) {
+    *settings->integrator = 0;
+    *settings->differentiator = 0;
+    *settings->error_d1 = 0;
+}
+
+/* Saturation function.  Ensures that result is within set limits. */
+float sat(float in, float upper_limit, float lower_limit) {
+    if (in > upper_limit) {
+        return upper_limit;
+    }
+    else if (in < lower_limit) {
+        return lower_limit;
     }
     else {
-        return u;
+        return in;
     }
 }
 
+float airspeed_with_pitch_hold(float Va_c, float Va, struct pidsettings *settings, uint32_t reset) {
+    if (reset) {
+        reset_pid(settings);
+    }
+
+    return pid_loop(settings->integrator, settings->differentiator, settings->error_d1, Va_c, Va, settings->kp, settings->ki, settings->kd, settings->Ts, settings->tau, settings->upper_limit, settings->lower_limit);
+}
