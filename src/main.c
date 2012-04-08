@@ -1,14 +1,13 @@
 /* Michael Pratt <michael@pratt.im>
  * Vastly simplified the code from https://github.com/jeremyherbert/stm32-templates/ */
 
-typedef unsigned long uint32_t;
+#include "system.h"
 
-#define RCC_CR      0x40023800                              /* RCC Clock Control Register */
-#define RCC_AHB1ENR *(volatile uint32_t *) (RCC_CR + 0x30)  /* AHB1 Enable Register */
+#define RCC_AHB1ENR *(volatile uint32_t *) (RCC_BASE + 0x30)    /* AHB1 Enable Register */
 
-#define GPIOD       0x40020c00                              /* Port D base address */
-#define GPIOD_MODER *(volatile uint32_t *) (GPIOD + 0x00)   /* Port D mode register */
-#define LED_ODR     *(volatile uint32_t *) (GPIOD + 0x14)   /* LED Output Data Register */
+#define GPIOD_BASE  (AHB1PERIPH_BASE + 0x0C00)                  /* GPIO Port D base address */
+#define GPIOD_MODER *(volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
+#define LED_ODR     *(volatile uint32_t *) (GPIOD_BASE + 0x14)  /* LED Output Data Register */
 
 void Delay(volatile uint32_t nCount);
 

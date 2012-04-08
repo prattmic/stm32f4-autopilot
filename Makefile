@@ -1,6 +1,7 @@
 # put your *.o targets here, make should handle the rest!
 
-SRCS = main.c stm32f4xx_it.c system_stm32f4xx.c
+#SRCS = main.c stm32f4xx_it.c system_stm32f4xx.c
+SRCS = main.c system.c
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
@@ -43,8 +44,13 @@ all: lib proj
 
 again: clean all
 
+# Flash the STM32F4
 burn:
 	$(STLINK)/flash/st-flash write $(PROJ_NAME).bin 0x8000000
+
+# Create tags; assumes ctags exists
+ctags:
+	ctags -R --exclude=*cm0.h --exclude=*cm3.h .
 
 lib:
 	$(MAKE) -C lib
