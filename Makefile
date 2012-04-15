@@ -29,7 +29,7 @@ vpath %.a lib
 ROOT=$(shell pwd)
 
 CFLAGS += -Iinc -Ilib -Ilib/inc 
-CFLAGS += -Ilib/inc/core -Ilib/inc/peripherals 
+CFLAGS += -Ilib/inc/core -Ilib/inc/peripherals
 
 SRCS += lib/startup_stm32f4xx.s # add startup file to build
 

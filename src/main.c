@@ -2,7 +2,7 @@
  * Simplified code from https://github.com/jeremyherbert/stm32-templates/
  * Building the Autopilot described in Small Unmanned Aircraft by Beard
  * Rev. Chapter 6 */
-
+#include "yenikpid.h"
 typedef unsigned long uint32_t;
 
 #define RCC_CR      0x40023800                              /* RCC Clock Control Register */
@@ -26,18 +26,23 @@ struct pidsettings {
     volatile float *error_d1;
 };
 
+/*globals*/
+volatile struct pid testpid;
+
+
 void Delay(volatile uint32_t nCount);
 
 /* Generic Function */
 float pid_loop(volatile float *integrator, volatile float *differentiator, volatile float *error_d1, float y_c, float y, float kp, float ki, float kd, float Ts, float tau, float upper_limit, float lower_limit);
 void reset_pid(struct pidsettings *settings);
 float sat(float in, float upper_limit, float lower_limit);
+float eval_pid(struct pid* this_pid, float set, float current, float Ts);
 
 /* Autopilot Functions */
 float airspeed_with_pitch_hold(float Va_c, float Va, struct pidsettings *settings, uint32_t reset);
 
 int main(void) {
-
+    //-----------------------TODO: INITIALZE PIDS FROM NV MEMORY---------------------------------------//
     /* Enable Port D Clock
     * See docs/stm32f4_ref.pdf page 110 for description of RCC_AHB1ENR */
     RCC_AHB1ENR |= (1 << 3);
@@ -58,22 +63,22 @@ void Delay(volatile uint32_t nCount) {
     /* Simulate wind-up */
     volatile float result = 0;
     float integr, diff, old_err;
-    struct pidsettings testpid;
-    testpid.kp = 3.14;
-    testpid.ki = 3.14;
-    testpid.kd = 3.14;
-    testpid.Ts = 3.14;
-    testpid.tau = 3.14;
-    testpid.upper_limit = nCount;
-    testpid.lower_limit = -(signed long)nCount;
-    testpid.integrator = &integr;
-    testpid.differentiator = &diff;
-    testpid.error_d1 = &old_err;
+    struct pidsettings testpidsettings;
+    testpidsettings.kp = 3.14;
+    testpidsettings.ki = 3.14;
+    testpidsettings.kd = 3.14;
+    testpidsettings.Ts = 3.14;
+    testpidsettings.tau = 3.14;
+    testpidsettings.upper_limit = nCount;
+    testpidsettings.lower_limit = -(signed long)nCount;
+    testpidsettings.integrator = &integr;
+    testpidsettings.differentiator = &diff;
+    testpidsettings.error_d1 = &old_err;
 
-    reset_pid(&testpid);
+    reset_pid(&testpidsettings);
 
     while(result != nCount && result != -(signed long)nCount) {
-        result = pid_loop(testpid.integrator, testpid.differentiator, testpid.error_d1, 100, 0, testpid.kp, testpid.ki, testpid.kd, testpid.Ts, testpid.tau, testpid.upper_limit, testpid.lower_limit);
+        result = pid_loop(testpidsettings.integrator, testpidsettings.differentiator, testpidsettings.error_d1, 100, 0, testpidsettings.kp, testpidsettings.ki, testpidsettings.kd, testpidsettings.Ts, testpidsettings.tau, testpidsettings.upper_limit, testpidsettings.lower_limit);
     }
 }
 
