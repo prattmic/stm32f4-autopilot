@@ -7,7 +7,7 @@ vpath %.c src src/peripherals
 
 CFLAGS  = -g -O2 -Wall
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
-CFLAGS += -mfloat-abi=softfp -mfpu=fpv4-sp-d16
+CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 CFLAGS += -ffreestanding -nostdlib
 CFLAGS += -Iinc -Iinc/core -Iinc/peripherals
 

@@ -36,9 +36,27 @@
   */
     
   .syntax unified
-  .cpu cortex-m3
-  .fpu softvfp
-  .thumb
+  .cpu cortex-m4
+  .arch armv7e-m
+  .fpu fpv4-sp-d16
+  .eabi_attribute Tag_CPU_name, "Cortex-M4"
+  .eabi_attribute Tag_CPU_arch, 13              /* v7E-M */
+  .eabi_attribute Tag_CPU_arch_profile, 0x4D    /* Microcontroller */
+  .eabi_attribute Tag_THUMB_ISA_use, 2          /* Use Thumb */
+  .eabi_attribute Tag_FP_arch, 6                /* VFPv4-D16 */
+  .eabi_attribute Tag_ABI_HardFP_use, 3         /* SP and DP Arguments */
+  .eabi_attribute Tag_ABI_VFP_args, 1           /* VFP Arguments */
+  .eabi_attribute Tag_ABI_optimization_goals, 6 /* Optimize for debugging */
+  .eabi_attribute Tag_FP_HP_extension, 1        /* Allow VFPv3 */
+  .eabi_attribute Tag_CPU_unaligned_access, 1   /* Allow unaligned data access */
+  .eabi_attribute Tag_ABI_PCS_wchar_t, 4        /* wchat_t size 4 */
+  .eabi_attribute Tag_ABI_FP_denormal, 1        /* We need IEEE 754 denormal numbers */
+  .eabi_attribute Tag_ABI_FP_exceptions, 1      /* Check IEEE 754 inexact exception */
+  .eabi_attribute Tag_ABI_FP_number_model, 3    /* Use full IEEE 754 */
+  .eabi_attribute Tag_ABI_align_needed, 1       /* 8-byte alignment */
+  .eabi_attribute Tag_ABI_align_preserved, 1    /* Preserve 8-byte alignment */
+  .eabi_attribute Tag_ABI_enum_size, 1          /* Place enums in the smallest location they will fit. */
+  .thumb 
 
 .global  g_pfnVectors
 .global  Default_Handler

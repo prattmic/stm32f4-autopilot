@@ -1,6 +1,7 @@
 # put your *.o targets here, make should handle the rest!
 
-SRCS = main.c pid.c stm32f4xx_it.c system_stm32f4xx.c
+SRCS = main.c system.c pid.c
+
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
@@ -19,7 +20,7 @@ OBJCOPY=arm-none-eabi-objcopy
 
 CFLAGS  = -g -Wall -Tstm32_flash.ld 
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
-CFLAGS += -mfloat-abi=softfp -mfpu=fpv4-sp-d16
+CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 ###################################################
 
@@ -43,8 +44,13 @@ all: lib proj
 
 again: clean all
 
+# Flash the STM32F4
 burn:
 	$(STLINK)/flash/st-flash write $(PROJ_NAME).bin 0x8000000
+
+# Create tags; assumes ctags exists
+ctags:
+	ctags -R --exclude=*cm0.h --exclude=*cm3.h .
 
 lib:
 	$(MAKE) -C lib
@@ -57,7 +63,7 @@ $(PROJ_NAME).elf: $(SRCS)
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 
 clean:
-	rm -f *.o
+	rm -f *.o *.i
 	rm -f $(PROJ_NAME).elf
 	rm -f $(PROJ_NAME).hex
 	rm -f $(PROJ_NAME).bin
