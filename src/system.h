@@ -3,6 +3,9 @@
 /* Generic system call library for STM32F4-DISCOVERY
  * Eliminates need for the huge STM libraries */
 
+#ifndef SYSTEM_H_INCLUDED
+#define SYSTEM_H_INCLUDED
+
 /* We will be wanting some typedefs */
 typedef unsigned short uint16_t;
 typedef unsigned long uint32_t;
@@ -82,3 +85,6 @@ void SysTick_Handler(void);
 #define  FLASH_ACR_ICEN         (uint32_t) (0x00000200)     /* Instruction Cache Enable */
 #define  FLASH_ACR_DCEN         (uint32_t) (0x00000400)     /* Data Cache Enable */
 #define  FLASH_ACR_LATENCY_5WS  (uint32_t) (0x00000005)     /* 5 Wait States Latency */
+
+
+#endif /* SYSTEM_H_INCLUDED */
