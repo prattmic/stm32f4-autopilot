@@ -1,11 +1,12 @@
 # put your *.o targets here, make should handle the rest!
 
-SRCS = main.c system.c pid.c
-
+SRCS = main.c system.c pid.c matrix.c trim.c
+#SRCS = matrix.c system.c
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
 PROJ_NAME=main
+#PROJ_NAME=matrix
 
 # Put your stlink folder here so make burn will work.
 
@@ -58,7 +59,7 @@ lib:
 proj: 	$(PROJ_NAME).elf
 
 $(PROJ_NAME).elf: $(SRCS)
-	$(CC) $(CFLAGS) $^ -o $@ -Llib -lstm32f4
+	$(CC) $(CFLAGS) $^ -o $@ -Llib -lstm32f4 -lm
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 
