@@ -66,7 +66,7 @@ float compute_J(float alpha, float beta, float phi, float Va, float R, float gam
 
     /* We multiply two matrices to find them (Eq. 5.20) */
     float da_dr_mult1_data[] = { P->C_p.delta_a, P->C_p.delta_r,
-                                      P->C_r.delta_r, P->C_r.delta_r};
+                                      P->C_r.delta_a, P->C_r.delta_r};
     struct matrix da_dr_mult1 = { da_dr_mult1_data, 2, 2 };
 
     float da_dr_mult2_data[] = { (-P->Gamma.one*state.p*state.r + P->Gamma.two*state.q*state.r)/(0.5*P->row*pow(Va,2)*P->S*P->b) - P->C_p.zero - P->C_p.beta*beta - P->C_p.p*(P->b*state.p)/(2*Va) - P->C_p.r*(P->b*state.r)/(2*Va),
@@ -86,10 +86,6 @@ float compute_J(float alpha, float beta, float phi, float Va, float R, float gam
     /* This is f(x,u), which comes from Eq. 5.3-5.12.  We need all the deflection crap first */
     struct dx f_x_u;
 
-    //Temp
-    float result;
-
-
     /* Eq. 5.18 - Elevator Deflection */
     input.delta_e = ( (P->J.xz * (pow(state.p,2) - pow(state.r,2)) + (P->J.x - P->J.z) * state.p * state.r)/(0.5 * P->row * pow(Va,2) * P->c * P->S) - P->C_m.zero - (P->C_m.alpha * alpha) - P->C_m.q * (P->c * state.q / 2 * Va) ) / P->C_m.delta_e;
 
@@ -105,23 +101,26 @@ float compute_J(float alpha, float beta, float phi, float Va, float R, float gam
 
     /* Now that we have all of the deflections, we can calculate f(x, u) using Eq. 5.3-5.12 */
     f_x_u.dh = state.u*cos(state.theta) - state.v*sin(phi)*cos(state.theta) - state.w*cos(phi)*cos(state.theta);
-    /* Evaluates to nan */
+
     f_x_u.du = state.r*state.v - state.q*state.w - P->g*sin(state.theta) + (P->row*pow(Va,2)*P->S)/(2*P->m) * (C_X_alpha + C_X_q_alpha*(P->c*state.q)/(2*Va) + C_X_delta_e_alpha*input.delta_e) + (P->row*P->S_prop*P->C_prop)/(2*P->m) * (pow(P->k_motor*input.delta_t,2) + pow(Va,2));
-    /* Evaluates to nan */
+
     f_x_u.dv = state.p*state.w - state.r*state.u - P->g*sin(state.theta) + (P->row*pow(Va,2)*P->S)/(2*P->m) * (P->C_Y.zero + P->C_Y.beta*beta + P->C_Y.p*(P->b*state.p)/(2*Va) + P->C_Y.r*(P->b*state.r)/(2*Va) + P->C_Y.delta_a*input.delta_a + P->C_Y.delta_r*input.delta_r);
+
     f_x_u.dw = state.q*state.u - state.p*state.v + P->g*cos(state.theta)*cos(phi) + (P->row*pow(Va,2)*P->S)/(2*P->m) * (C_Z_alpha + C_Z_q_alpha*(P->c*state.q)/(2*Va) + C_Z_delta_e_alpha*input.delta_e);
+
     f_x_u.dphi = state.p + state.q*sin(phi)*tan(state.theta) + state.r*cos(phi)*tan(state.theta);
+
     f_x_u.dtheta = state.q*cos(phi) - state.r*sin(phi);
+
     f_x_u.dpsi = state.q*sin(phi)*1/cos(state.theta) + state.r*cos(phi)*1/cos(state.theta);
-    /* Evaluates to nan */
+
     f_x_u.dp = P->Gamma.one*state.p*state.q - P->Gamma.two*state.q*state.r + 0.5*P->row*pow(Va,2)*P->S*P->b*(P->C_p.zero + P->C_p.beta*beta + P->C_p.p*(P->b*state.p)/(2*Va) + P->C_p.r*(P->b*state.r)/(2*Va) + P->C_p.delta_a*input.delta_a + P->C_p.delta_r*input.delta_r);
+
     f_x_u.dq = P->Gamma.five*state.p*state.r - P->Gamma.six*(pow(state.p,2) - pow(state.r,2)) + (P->row*pow(Va,2)*P->S*P->c)/(2*P->J.y) * (P->C_m.zero + P->C_m.alpha*alpha + P->C_m.q*(P->c*state.q)/(2*Va) + P->C_m.delta_e*input.delta_e);
-    /* Evaluates to nan */
+
     f_x_u.dr = P->Gamma.seven*state.p*state.q - P->Gamma.one*state.q*state.r + 0.5*P->row*pow(Va,2)*P->S*P->b*(P->C_r.zero + P->C_r.beta*beta + P->C_r.p*(P->b*state.p)/(2*Va) + P->C_r.r*(P->b*state.r)/(2*Va) + P->C_r.delta_a*input.delta_a + P->C_r.delta_r*input.delta_r);
 
     /* Return value is ||x - f(x,u)||^2, so the square of the magnitude of the difference between x and f(x,u).
      * Since norm is sqrt(x_1^2 + ... + x_n^2), the sqrt goes away when we square.*/
-    result = pow(xstar.dh-f_x_u.dh,2) + pow(xstar.du-f_x_u.du,2) + pow(xstar.dv-f_x_u.dv,2) + pow(xstar.dw-f_x_u.dw,2) + pow(xstar.dphi-f_x_u.dphi,2) + pow(xstar.dtheta-f_x_u.dtheta,2) + pow(xstar.dpsi-f_x_u.dpsi,2) + pow(xstar.dp-f_x_u.dp,2) + pow(xstar.dq-f_x_u.dq,2) + pow(xstar.dr-f_x_u.dr,2);
-
-    return result;
+    return pow(xstar.dh-f_x_u.dh,2) + pow(xstar.du-f_x_u.du,2) + pow(xstar.dv-f_x_u.dv,2) + pow(xstar.dw-f_x_u.dw,2) + pow(xstar.dphi-f_x_u.dphi,2) + pow(xstar.dtheta-f_x_u.dtheta,2) + pow(xstar.dpsi-f_x_u.dpsi,2) + pow(xstar.dp-f_x_u.dp,2) + pow(xstar.dq-f_x_u.dq,2) + pow(xstar.dr-f_x_u.dr,2);
 }

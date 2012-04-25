@@ -19,6 +19,12 @@ int main(void) {
     float J;
     /* Using Aersonde UAV Parameters, pg. 288 */
     struct plane UAV = { 0 };
+    float alpha = 0;
+    float beta = 0;
+    float phi = 0;
+    float Va = 20;
+    float R = 10;
+    float gamma = 0.053;
     //-----------------------TODO: INITIALZE PIDS FROM NV MEMORY---------------------------------------//
     /* Enable Port D Clock
     * See docs/stm32f4_ref.pdf page 110 for description of RCC_AHB1ENR */
@@ -69,6 +75,9 @@ int main(void) {
     UAV.C_Y.delta_a =   0;
     UAV.C_l.delta_a =   0.1682;
     UAV.C_n.delta_a =   -0.00328;
+    UAV.C_Y.delta_r =   -0.17;
+    UAV.C_l.delta_r =   0.105;
+    UAV.C_n.delta_r =   -0.032;
     UAV.C_prop =        1;
     UAV.M =             50;
     UAV.alpha_0 =       0.4712;
@@ -80,7 +89,7 @@ int main(void) {
     compute_params(&UAV);
 
     /* Let's get the value of J! */
-    J = compute_J(0.1745,0.1745,0.1745,20,10,0.1745,&UAV);  /* 10deg alpha, beta, and phi, Va=20, R=10, gamma=10deg */
+    J = compute_J(alpha,beta,phi,Va,R,gamma,&UAV);  /* 0deg alpha, beta, and phi, Va=20, R=10, gamma=5deg */
 
     while (1) {
         /* Toggle LEDs */
