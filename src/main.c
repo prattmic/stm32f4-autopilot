@@ -16,7 +16,7 @@
 void Delay(volatile uint32_t nCount);
 
 int main(void) {
-    float J;
+    struct trim_out result;
     /* Using Aersonde UAV Parameters, pg. 288 */
     struct plane UAV = { 0 };
     float alpha = 0;
@@ -89,7 +89,7 @@ int main(void) {
     compute_params(&UAV);
 
     /* Let's get the value of J! */
-    J = compute_J(alpha,beta,phi,Va,R,gamma,&UAV);  /* 0deg alpha, beta, and phi, Va=20, R=10, gamma=5deg */
+    result = minimize_J(alpha,beta,phi,Va,R,gamma,&UAV);  /* 0deg alpha, beta, and phi, Va=20, R=10, gamma=5deg */
 
     while (1) {
         /* Toggle LEDs */

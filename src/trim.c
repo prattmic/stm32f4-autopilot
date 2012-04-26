@@ -90,7 +90,8 @@ float compute_J(float alpha, float beta, float phi, float Va, float R, float gam
     input.delta_e = ( (P->J.xz * (pow(state.p,2) - pow(state.r,2)) + (P->J.x - P->J.z) * state.p * state.r)/(0.5 * P->row * pow(Va,2) * P->c * P->S) - P->C_m.zero - (P->C_m.alpha * alpha) - P->C_m.q * (P->c * state.q / 2 * Va) ) / P->C_m.delta_e;
 
     /* Eq. 5.19 - Throttle Deflection - Uses linearizations of C_L(alpha) and C_D(alpha) */
-    input.delta_t = sqrt( (2*P->m * (-state.r*state.v + state.q*state.w * P->g*sin(state.theta)) - P->row*pow(Va,2)*P->S*(C_X_alpha + C_X_q_alpha*(P->c*state.q)/(2*Va) + C_X_delta_e_alpha*input.delta_e))/(P->row*P->S_prop*P->C_prop*pow(P->k_motor,2)) + pow(Va,2)/pow(P->k_motor,2) );
+    /* The fabs() might not be allowed, but shit was breaking */
+    input.delta_t = sqrt( fabs( (2*P->m * (-state.r*state.v + state.q*state.w * P->g*sin(state.theta)) - P->row*pow(Va,2)*P->S*(C_X_alpha + C_X_q_alpha*(P->c*state.q)/(2*Va) + C_X_delta_e_alpha*input.delta_e))/(P->row*P->S_prop*P->C_prop*pow(P->k_motor,2)) + pow(Va,2)/pow(P->k_motor,2) ) );
 
     /* Eq. 5.20 - Aileron and Rudder Deflection */
     matrix_invert_2(&da_dr_mult1, &da_dr_mult1);         /* Invert the first matrix in place */
@@ -123,4 +124,51 @@ float compute_J(float alpha, float beta, float phi, float Va, float R, float gam
     /* Return value is ||x - f(x,u)||^2, so the square of the magnitude of the difference between x and f(x,u).
      * Since norm is sqrt(x_1^2 + ... + x_n^2), the sqrt goes away when we square.*/
     return pow(xstar.dh-f_x_u.dh,2) + pow(xstar.du-f_x_u.du,2) + pow(xstar.dv-f_x_u.dv,2) + pow(xstar.dw-f_x_u.dw,2) + pow(xstar.dphi-f_x_u.dphi,2) + pow(xstar.dtheta-f_x_u.dtheta,2) + pow(xstar.dpsi-f_x_u.dpsi,2) + pow(xstar.dp-f_x_u.dp,2) + pow(xstar.dq-f_x_u.dq,2) + pow(xstar.dr-f_x_u.dr,2);
+}
+
+/* Alogrithm 3 - pg. 72, sec. 5.3.3.  See also: https://hpcrd.lbl.gov/~meza/papers/Steepest%20Descent.pdf */
+struct trim_out minimize_J(float alpha, float beta, float phi, float Va, float R, float gamma, struct plane *P) {
+    struct trim_out result;
+
+    float tolerance = 0.0001;    /* How close do we need to be to assume we are at the bottom? */
+    float k = 0.00000001;     /* Step length, adjust as necessary, can even change at each loop. */
+
+    float alpha_plus, beta_plus, phi_plus;
+    float alpha_old, beta_old, phi_old;
+    float dJ_dalpha, dJ_dbeta, dJ_dphi;
+
+    int i = 0;
+
+    //P->epsilon = 0.0001;    /* Fuck you */
+    
+    do {
+        float J_std = compute_J(alpha, beta, phi, Va, R, gamma, P);     /* So we don't have to compute this 3 times */
+
+        alpha_plus = alpha + P->epsilon;
+        beta_plus = beta + P->epsilon;
+        phi_plus = phi + P->epsilon;
+
+        dJ_dalpha = (compute_J(alpha_plus, beta, phi, Va, R, gamma, P) - J_std) / P->epsilon;
+        dJ_dbeta = (compute_J(alpha, beta_plus, phi, Va, R, gamma, P) - J_std) / P->epsilon;
+        dJ_dphi = (compute_J(alpha, beta, phi_plus, Va, R, gamma, P) - J_std) / P->epsilon;
+
+        /* Remember old values */
+        alpha_old = alpha;
+        beta_old = beta;
+        phi_old = phi;
+
+        /* Compute new values */
+        alpha = alpha - k*dJ_dalpha;
+        beta = beta - k*dJ_dbeta;
+        phi = phi - k*dJ_dphi;
+
+        i += 1;
+    } while (fabs(alpha-alpha_old) > tolerance || fabs(beta-beta_old) > tolerance || fabs(phi-phi_old) > tolerance);       /* When we are within tolerances, we have hit the bottom */
+
+    result.alpha = alpha;
+    result.beta = beta;
+    result.phi = phi;
+    result.i = i;
+
+    return result;
 }

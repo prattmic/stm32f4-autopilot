@@ -53,6 +53,9 @@ burn:
 ctags:
 	ctags -R --exclude=*cm0.h --exclude=*cm3.h .
 
+console:
+	gcc src/console.c src/trim.c src/matrix.c -o console -lm -g
+
 lib:
 	$(MAKE) -C lib
 

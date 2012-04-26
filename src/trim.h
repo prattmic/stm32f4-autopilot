@@ -30,6 +30,7 @@ struct trim_out {
     float alpha;        /* Angle of attack */
     float phi;          /* Roll angle */
     float beta;         /* Sideslip angle */
+    int i;
 };
 
 struct dx {
@@ -117,5 +118,6 @@ struct plane {
 
 void compute_params(struct plane *P);
 float compute_J(float alpha, float beta, float phi, float Va, float R, float gamma, struct plane *P);
+struct trim_out minimize_J(float alpha, float beta, float phi, float Va, float R, float gamma, struct plane *P);
 
 #endif /* TRIM_H_INCLUDED */
