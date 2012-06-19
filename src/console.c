@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define MAXLINE 100
 
 int getnewline(char line[], int max);
 
-int main(void) {
+int main(int argc, char *argv[]) {
     char line[MAXLINE];
     float alpha, beta, phi, Va, R, gamma;
     struct plane UAV = { 0 };
@@ -63,25 +64,37 @@ int main(void) {
 
     compute_params(&UAV);
 
-    while (1) {
-        printf("alpha = ");
-        if (scanf("%f", &alpha) != 1) {
-            printf("error\n");
-        }
-        printf("beta = ");
-        scanf("%f", &beta);
-        printf("phi = ");
-        scanf("%f", &phi);
-        printf("Va = ");
-        scanf("%f", &Va);
-        printf("R = ");
-        scanf("%f", &R);
-        printf("gamma = ");
-        scanf("%f", &gamma);
+    if (argc == 7) {
+        alpha = atof(argv[1]);
+        beta  = atof(argv[2]);
+        phi   = atof(argv[3]);
+        Va    = atof(argv[4]);
+        R     = atof(argv[5]);
+        gamma = atof(argv[6]);
 
         result = minimize_J(alpha, beta, phi, Va, R, gamma, &UAV);
-        //printf("J = %f\n", result);
-        printf("alpha = %f beta = %f phi = %f i = %d\n", result.alpha, result.beta, result.phi, result.i);
+        printf("alpha = %f beta = %f phi = %f i = %d J = %f\n", result.alpha, result.beta, result.phi, result.i, result.J);
+    }
+    else {
+        while (1) {
+            printf("alpha = ");
+            if (scanf("%f", &alpha) != 1) {
+                printf("error\n");
+            }
+            printf("beta = ");
+            scanf("%f", &beta);
+            printf("phi = ");
+            scanf("%f", &phi);
+            printf("Va = ");
+            scanf("%f", &Va);
+            printf("R = ");
+            scanf("%f", &R);
+            printf("gamma = ");
+            scanf("%f", &gamma);
+
+            result = minimize_J(alpha, beta, phi, Va, R, gamma, &UAV);
+            printf("alpha = %f beta = %f phi = %f i = %d J = %f\n", result.alpha, result.beta, result.phi, result.i, result.J);
+        }
     }
 
     return 0;

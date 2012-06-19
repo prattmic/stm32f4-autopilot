@@ -1,7 +1,13 @@
 /* Calculate Trim Values for various aspects of the plane.
  * See Section 5.3.3 for algorithms */
 
+#define CONSOLE
 #include "trim.h"
+#include <float.h>
+
+#ifdef CONSOLE
+#include <stdio.h>
+#endif
 
 /* Computes extra plane parameters based on the user defined ones. */
 void compute_params(struct plane *P) {
@@ -36,6 +42,12 @@ void compute_params(struct plane *P) {
 
 /* Algorithm 2 - pg. 71 */
 float compute_J(float alpha, float beta, float phi, float Va, float R, float gamma, struct plane *P) {
+
+    /* For no turn, we actually want an infinite radius turn */
+    if (R == 0) {
+        R = FLT_MAX;
+    }
+
     /* Copying formulas from a book is fun! */
     struct dx xstar = { Va * sin(gamma),                    /* dh */
                         0,                                  /* du */
@@ -130,8 +142,10 @@ float compute_J(float alpha, float beta, float phi, float Va, float R, float gam
 struct trim_out minimize_J(float alpha, float beta, float phi, float Va, float R, float gamma, struct plane *P) {
     struct trim_out result;
 
-    float tolerance = 0.0001;    /* How close do we need to be to assume we are at the bottom? */
-    float k = 0.00000001;     /* Step length, adjust as necessary, can even change at each loop. */
+    float tolerance = 1e-10;    /* How close do we need to be to assume we are at the bottom? */
+    /* We actually have to minimize k at each step as well! http://en.wikipedia.org/wiki/Line_search */
+    float k;
+    //float k = 0.00000001;     /* Step length, adjust as necessary, can even change at each loop. */
 
     float alpha_plus, beta_plus, phi_plus;
     float alpha_old, beta_old, phi_old;
@@ -139,7 +153,7 @@ struct trim_out minimize_J(float alpha, float beta, float phi, float Va, float R
 
     int i = 0;
 
-    //P->epsilon = 0.0001;    /* Fuck you */
+    P->epsilon = 0.001;    /* Fuck you */
     
     do {
         float J_std = compute_J(alpha, beta, phi, Va, R, gamma, P);     /* So we don't have to compute this 3 times */
@@ -149,18 +163,27 @@ struct trim_out minimize_J(float alpha, float beta, float phi, float Va, float R
         phi_plus = phi + P->epsilon;
 
         dJ_dalpha = (compute_J(alpha_plus, beta, phi, Va, R, gamma, P) - J_std) / P->epsilon;
-        dJ_dbeta = (compute_J(alpha, beta_plus, phi, Va, R, gamma, P) - J_std) / P->epsilon;
-        dJ_dphi = (compute_J(alpha, beta, phi_plus, Va, R, gamma, P) - J_std) / P->epsilon;
+        dJ_dbeta  = (compute_J(alpha, beta_plus, phi, Va, R, gamma, P) - J_std) / P->epsilon;
+        dJ_dphi   = (compute_J(alpha, beta, phi_plus, Va, R, gamma, P) - J_std) / P->epsilon;
 
         /* Remember old values */
         alpha_old = alpha;
         beta_old = beta;
         phi_old = phi;
 
+        k = minimize_k(alpha, beta, phi, Va, R, gamma, dJ_dalpha, dJ_dbeta, dJ_dphi, J_std, P);
+        k = fabs(k);
+
         /* Compute new values */
         alpha = alpha - k*dJ_dalpha;
         beta = beta - k*dJ_dbeta;
         phi = phi - k*dJ_dphi;
+
+#ifdef CONSOLE
+        if (i % 2 == 0) {
+            printf("J = %f k = %e alpha = %f beta = %f phi = %f dJ_dalpha = %f dJ_dbeta = %f dJ_dphi = %f dalpha = %f dbeta = %f dphi = %f\n", J_std, k, alpha_old, beta_old, phi_old, dJ_dalpha, dJ_dbeta, dJ_dphi, alpha-alpha_old, beta-beta_old, phi-phi_old);
+        }
+#endif
 
         i += 1;
     } while (fabs(alpha-alpha_old) > tolerance || fabs(beta-beta_old) > tolerance || fabs(phi-phi_old) > tolerance);       /* When we are within tolerances, we have hit the bottom */
@@ -169,6 +192,71 @@ struct trim_out minimize_J(float alpha, float beta, float phi, float Va, float R
     result.beta = beta;
     result.phi = phi;
     result.i = i;
+    result.J = compute_J(alpha, beta, phi, Va, R, gamma, P);
 
     return result;
+}
+
+/* Minimize k so we can step along */
+/* Minimize f(x + a*p) for a */
+float minimize_k(float alpha, float beta, float phi, float Va, float R, float gamma, float dJ_dalpha, float dJ_dbeta, float dJ_dphi, float J_std, struct plane *P) {
+    float dot = alpha*dJ_dalpha + beta*dJ_dbeta + phi*dJ_dphi;
+    float c1 = 1e-4;
+    float c2 = 0.9;
+    float k_plus, dJ_dk;
+    float step;
+    float alpha_plus, beta_plus, phi_plus;
+    float dJk_dalpha, dJk_dbeta, dJk_dphi;
+    float k_old;
+    float step_dot;
+    float epsilon = 0.001;
+    float k_epsilon = 0.0000001;
+    float ihateyou = 1e-20; /* Ok, so I have to do this minimization to get the best step size for the parent minimization.  How do I find the best step size for this one?  Infinite recursion? */
+    float k = 0.00000001;    /* Make a best guess */
+    int i = 0;
+
+    do {
+    k_plus = k + k/1000;
+
+    step = compute_J(alpha + k*dJ_dalpha, beta + k*dJ_dbeta, phi + k*dJ_dphi, Va, R, gamma, P);
+    dJ_dk = (compute_J(alpha + k_plus*dJ_dalpha, beta + k_plus*dJ_dbeta, phi + k_plus*dJ_dphi, Va, R, gamma, P) - step) / (k/1000);
+
+    alpha_plus = alpha + epsilon;
+    beta_plus = beta + epsilon;
+    phi_plus = phi + epsilon;
+
+    dJk_dalpha = (compute_J(alpha_plus + k*dJ_dalpha, beta, phi, Va, R, gamma, P) - step) / epsilon;
+    dJk_dbeta  = (compute_J(alpha + k*dJ_dalpha, beta_plus, phi, Va, R, gamma, P) - step) / epsilon;
+    dJk_dphi   = (compute_J(alpha + k*dJ_dalpha, beta, phi_plus, Va, R, gamma, P) - step) / epsilon;
+
+    step_dot = alpha*dJk_dalpha + beta*dJk_dbeta + phi*dJk_dphi;
+
+    k_old = k;
+
+    k = k - ihateyou*dJ_dk;
+
+    if (k > 1) {
+        k = 1;
+    }
+    else if (k < -1) {
+        k = -1;
+    }
+
+    if (dJ_dk == 0) {
+        k_epsilon *= 10;
+    }
+
+#ifdef CONSOLE
+    if (i % 100 == 0){
+        printf("k = %e dJ_dk = %f\n", k, dJ_dk);
+    }
+//    printf("%f > %f\n", step, J_std + c1*k_old*dot);
+//    printf("%f < %f\n", step_dot, c2*dot);
+#endif
+
+    i += 1;
+
+    } while (step > J_std + c1*k_old*dot || step_dot < c2*dot);
+
+    return k_old;
 }
