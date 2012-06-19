@@ -6,3 +6,5 @@
 *.swp
 tags
 uavbook/*
+*ert_rtw/
+console
