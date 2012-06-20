@@ -3,10 +3,14 @@ Model {
   Version		  7.7
   MdlSubVersion		  0
   GraphicalInterface {
-    NumRootInports	    1
+    NumRootInports	    2
     Inport {
       BusObject		      ""
       Name		      "Theta Commanded"
+    }
+    Inport {
+      BusObject		      ""
+      Name		      "d_theta_2"
     }
     NumRootOutports	    1
     Outport {
@@ -15,7 +19,7 @@ Model {
       Name		      "Theta"
     }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.8"
+    ComputedModelVersion    "1.13"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -35,9 +39,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "prattmic"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jun 19 16:29:33 2012"
-  RTWModifiedTimeStamp	  262024171
-  ModelVersionFormat	  "1.%<AutoIncrement:8>"
+  LastModifiedDate	  "Tue Jun 19 23:05:36 2012"
+  RTWModifiedTimeStamp	  262046575
+  ModelVersionFormat	  "1.%<AutoIncrement:13>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -74,6 +78,7 @@ Model {
     $ObjectID		    1
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
     model_		    "roll_attitude_hold"
+    signals_		    []
     overrideMode_	    [0.0]
     Array {
       Type		      "Cell"
@@ -81,6 +86,7 @@ Model {
       Cell		      "roll_attitude_hold"
       PropName		      "logAsSpecifiedByModels_"
     }
+    logAsSpecifiedByModelsSSIDs_ []
   }
   RecordCoverage	  off
   CovPath		  "/"
@@ -117,6 +123,9 @@ Model {
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
   ExtModeAutoUpdateStatusClock on
+  TunableVars		  "a_theta_1,a_theta_2,k_d_theta,k_p_theta"
+  TunableVarsStorageClass "Auto,Auto,Auto,Auto"
+  TunableVarsTypeQualifier ",,,"
   BufferReuse		  on
   ShowModelReferenceBlockVersion off
   ShowModelReferenceBlockIO off
@@ -135,7 +144,7 @@ Model {
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
-	  FixedStep		  "auto"
+	  FixedStep		  "0.01"
 	  InitialStep		  "auto"
 	  MaxNumMinSteps	  "-1"
 	  MaxOrder		  5
@@ -608,8 +617,8 @@ Model {
       }
       Name		      "Configuration"
       ExtraOptions	      "-aGenerateTraceInfo=0 -aIgnoreTestpoints=0 "
-      CurrentDlgPage	      "Code Generation/Interface"
-      ConfigPrmDlgPosition     [ -1401, 210, -518, 848 ] 
+      CurrentDlgPage	      "Optimization/Signals and Parameters"
+      ConfigPrmDlgPosition     [ -1401, 150, -518, 908 ] 
     }
     PropName		    "ConfigurationSets"
   }
@@ -755,12 +764,23 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "10"
+    SIDHighWatermark	    "25"
     Block {
       BlockType		      Inport
       Name		      "Theta Commanded"
       SID		      "1"
       Position		      [225, 188, 255, 202]
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Inport
+      Name		      "d_theta_2"
+      SID		      "22"
+      Position		      [853, 10, 867, 40]
+      BlockRotation	      270
+      BlockMirror	      on
+      NamePlacement	      "alternate"
+      Port		      "2"
       IconDisplay	      "Port number"
     }
     Block {
@@ -785,6 +805,19 @@ Model {
       SaturateOnIntegerOverflow	off
     }
     Block {
+      BlockType		      Gain
+      Name		      "Gain2"
+      SID		      "23"
+      Position		      [805, 75, 915, 145]
+      BlockRotation	      270
+      BlockMirror	      on
+      NamePlacement	      "alternate"
+      Gain		      "1/a_theta_2"
+      ParamDataTypeStr	      "Inherit: Inherit via internal rule"
+      OutDataTypeStr	      "Inherit: Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
       BlockType		      Integrator
       Name		      "Integrator"
       SID		      "3"
@@ -796,7 +829,7 @@ Model {
       Name		      "Sum"
       SID		      "6"
       Ports		      [2, 1]
-      Position		      [375, 175, 415, 215]
+      Position		      [315, 175, 355, 215]
       ShowName		      off
       IconShape		      "round"
       Inputs		      "|+-"
@@ -808,11 +841,24 @@ Model {
       BlockType		      Sum
       Name		      "Sum1"
       SID		      "8"
-      Ports		      [2, 1]
-      Position		      [755, 175, 795, 215]
+      Ports		      [3, 1]
+      Position		      [695, 175, 735, 215]
       ShowName		      off
       IconShape		      "round"
-      Inputs		      "|+-"
+      Inputs		      "++-"
+      InputSameDT	      off
+      OutDataTypeStr	      "Inherit: Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
+      BlockType		      Sum
+      Name		      "Sum2"
+      SID		      "24"
+      Ports		      [2, 1]
+      Position		      [840, 175, 880, 215]
+      ShowName		      off
+      IconShape		      "round"
+      Inputs		      "++|"
       InputSameDT	      off
       OutDataTypeStr	      "Inherit: Inherit via internal rule"
       SaturateOnIntegerOverflow	off
@@ -824,6 +870,14 @@ Model {
       Position		      [995, 164, 1075, 226]
       Numerator		      "[a_theta_2]"
       Denominator	      "[1 a_theta_1]"
+    }
+    Block {
+      BlockType		      TransferFcn
+      Name		      "Transfer Fcn1"
+      SID		      "25"
+      Position		      [485, 52, 545, 88]
+      Numerator		      "[k_i_theta]"
+      Denominator	      "[1 0]"
     }
     Block {
       BlockType		      Outport
@@ -841,9 +895,29 @@ Model {
 	DstPort			1
       }
       Branch {
-	Points			[0, 185; -1035, 0]
+	Points			[0, 185; -1095, 0]
 	DstBlock		"Sum"
 	DstPort			2
+      }
+    }
+    Line {
+      SrcBlock		      "Theta Commanded"
+      SrcPort		      1
+      DstBlock		      "Sum"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Sum"
+      SrcPort		      1
+      Points		      [70, 0]
+      Branch {
+	DstBlock		"Gain"
+	DstPort			1
+      }
+      Branch {
+	Points			[0, -125]
+	DstBlock		"Transfer Fcn1"
+	DstPort			1
       }
     }
     Line {
@@ -861,35 +935,48 @@ Model {
       }
     }
     Line {
-      SrcBlock		      "Theta Commanded"
+      SrcBlock		      "d_theta_2"
       SrcPort		      1
-      DstBlock		      "Sum"
+      DstBlock		      "Gain2"
       DstPort		      1
     }
     Line {
-      SrcBlock		      "Sum"
+      SrcBlock		      "Gain2"
       SrcPort		      1
-      DstBlock		      "Gain"
+      DstBlock		      "Sum2"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Sum1"
+      SrcPort		      1
+      DstBlock		      "Sum2"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "Sum2"
+      SrcPort		      1
+      DstBlock		      "Transfer Fcn"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Transfer Fcn1"
+      SrcPort		      1
+      Points		      [165, 0]
+      DstBlock		      "Sum1"
       DstPort		      1
     }
     Line {
       SrcBlock		      "Gain"
       SrcPort		      1
       DstBlock		      "Sum1"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "Sum1"
-      SrcPort		      1
-      DstBlock		      "Transfer Fcn"
-      DstPort		      1
+      DstPort		      2
     }
     Line {
       SrcBlock		      "Gain1"
       SrcPort		      1
-      Points		      [-215, 0]
+      Points		      [-275, 0]
       DstBlock		      "Sum1"
-      DstPort		      2
+      DstPort		      3
     }
     Annotation {
       Name		      "p"
@@ -897,7 +984,7 @@ Model {
     }
     Annotation {
       Name		      "e_theta"
-      Position		      [445, 185]
+      Position		      [385, 185]
     }
     Annotation {
       Name		      "delta_a_prime"
@@ -905,7 +992,7 @@ Model {
     }
     Annotation {
       Name		      "delta_a"
-      Position		      [848, 183]
+      Position		      [948, 183]
     }
   }
 }

@@ -1,15 +1,28 @@
 Model {
-  Name			  "roll_attitude_hold_test"
+  Name			  "altitude_hold_using_commanded_pitch"
   Version		  7.7
   MdlSubVersion		  0
   GraphicalInterface {
-    NumRootInports	    0
-    NumRootOutports	    0
+    NumRootInports	    2
+    Inport {
+      BusObject		      ""
+      Name		      "Height Commanded"
+    }
+    Inport {
+      BusObject		      ""
+      Name		      "d_h"
+    }
+    NumRootOutports	    1
+    Outport {
+      BusObject		      ""
+      BusOutputAsStruct	      "off"
+      Name		      "Height"
+    }
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.10"
+    ComputedModelVersion    "1.6"
     NumModelReferences	    1
     ModelReference {
-      ModelRefBlockPath	      "roll_attitude_hold_test/Model|roll_attitude_hold"
+      ModelRefBlockPath	      "altitude_hold_using_commanded_pitch/Model|pitch_attitude_hold"
     }
     NumTestPointedSignals   0
   }
@@ -23,15 +36,15 @@ Model {
   MinMaxOverflowLogging	  "UseLocalSettings"
   MinMaxOverflowArchiveMode "Overwrite"
   MaxMDLFileLineLength	  120
-  Created		  "Tue Jun 19 15:45:15 2012"
+  Created		  "Wed Jun 20 00:26:49 2012"
   Creator		  "prattmic"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "prattmic"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jun 19 23:24:04 2012"
-  RTWModifiedTimeStamp	  262048491
-  ModelVersionFormat	  "1.%<AutoIncrement:10>"
+  LastModifiedDate	  "Wed Jun 20 01:19:34 2012"
+  RTWModifiedTimeStamp	  262055971
+  ModelVersionFormat	  "1.%<AutoIncrement:6>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -67,13 +80,13 @@ Model {
     $PropName		    "DataLoggingOverride"
     $ObjectID		    1
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
-    model_		    "roll_attitude_hold_test"
+    model_		    "altitude_hold_using_commanded_pitch"
     signals_		    []
     overrideMode_	    [0.0]
     Array {
       Type		      "Cell"
       Dimension		      1
-      Cell		      "roll_attitude_hold_test"
+      Cell		      "altitude_hold_using_commanded_pitch"
       PropName		      "logAsSpecifiedByModels_"
     }
     Array {
@@ -151,8 +164,8 @@ Model {
 	  RelTol		  "1e-3"
 	  SolverMode		  "Auto"
 	  ConcurrentTasks	  off
-	  Solver		  "ode3"
-	  SolverName		  "ode3"
+	  Solver		  "ode45"
+	  SolverName		  "ode45"
 	  SolverJacobianMethodControl "auto"
 	  ShapePreserveControl	  "DisableAll"
 	  ZeroCrossControl	  "UseLocalSettings"
@@ -347,13 +360,13 @@ Model {
 	  ProdBitPerFloat	  32
 	  ProdBitPerDouble	  64
 	  ProdBitPerPointer	  32
-	  ProdLargestAtomicInteger "Long"
-	  ProdLargestAtomicFloat  "Double"
+	  ProdLargestAtomicInteger "Char"
+	  ProdLargestAtomicFloat  "None"
 	  ProdIntDivRoundTo	  "Undefined"
-	  ProdEndianess		  "LittleEndian"
+	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
 	  ProdShiftRightIntArith  on
-	  ProdHWDeviceType	  "ARM Compatible->ARM Cortex"
+	  ProdHWDeviceType	  "32-bit Generic"
 	  TargetBitPerChar	  8
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
@@ -421,7 +434,7 @@ Model {
 	    PropName		    "DisabledProps"
 	  }
 	  SystemTargetFile	  "grt.tlc"
-	  GenCodeOnly		  on
+	  GenCodeOnly		  off
 	  MakeCommand		  "make_rtw"
 	  GenerateMakefile	  on
 	  TemplateMakefile	  "grt_default_tmf"
@@ -608,7 +621,7 @@ Model {
 	PropName		"Components"
       }
       Name		      "Configuration"
-      CurrentDlgPage	      "Solver"
+      CurrentDlgPage	      "Optimization/Signals and Parameters"
       ConfigPrmDlgPosition     [ 360, 135, 1240, 765 ] 
     }
     PropName		    "ConfigurationSets"
@@ -650,77 +663,89 @@ Model {
   }
   BlockParameterDefaults {
     Block {
+      BlockType		      Gain
+      Gain		      "1"
+      Multiplication	      "Element-wise(K.*u)"
+      ParamMin		      "[]"
+      ParamMax		      "[]"
+      ParamDataTypeStr	      "Inherit: Same as input"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: Same as input"
+      LockScale		      off
+      RndMeth		      "Floor"
+      SaturateOnIntegerOverflow	on
+      SampleTime	      "-1"
+    }
+    Block {
+      BlockType		      Inport
+      Port		      "1"
+      OutputFunctionCall      off
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
+      SampleTime	      "-1"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      LatchByDelayingOutsideSignal off
+      LatchInputForFeedbackSignals off
+      Interpolate	      on
+    }
+    Block {
       BlockType		      ModelReference
       Variant		      off
       GeneratePreprocessorConditionals off
       CopyOfModelProtected    off
     }
     Block {
-      BlockType		      Product
-      Inputs		      "2"
-      Multiplication	      "Element-wise(.*)"
+      BlockType		      Outport
+      Port		      "1"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
+      SampleTime	      "-1"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      SourceOfInitialOutputValue "Dialog"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
+    }
+    Block {
+      BlockType		      Sum
+      IconShape		      "rectangular"
+      Inputs		      "++"
       CollapseMode	      "All dimensions"
       CollapseDim	      "1"
       InputSameDT	      on
+      AccumDataTypeStr	      "Inherit: Inherit via internal rule"
       OutMin		      "[]"
       OutMax		      "[]"
       OutDataTypeStr	      "Inherit: Same as first input"
       LockScale		      off
-      RndMeth		      "Zero"
+      RndMeth		      "Floor"
       SaturateOnIntegerOverflow	on
       SampleTime	      "-1"
     }
     Block {
-      BlockType		      RandomNumber
-      Mean		      "0"
-      Variance		      "1"
-      Seed		      "0"
-      SampleTime	      "-1"
-      VectorParams1D	      on
-    }
-    Block {
-      BlockType		      RateTransition
-      Integrity		      on
-      Deterministic	      on
-      X0		      "0"
-      OutPortSampleTimeOpt    "Specify"
-      OutPortSampleTimeMultiple	"1"
-      OutPortSampleTime	      "-1"
-    }
-    Block {
-      BlockType		      Scope
-      ModelBased	      off
-      TickLabels	      "OneTimeTick"
-      ZoomMode		      "on"
-      Grid		      "on"
-      TimeRange		      "auto"
-      YMin		      "-5"
-      YMax		      "5"
-      SaveToWorkspace	      off
-      SaveName		      "ScopeData"
-      LimitDataPoints	      on
-      MaxDataPoints	      "5000"
-      Decimation	      "1"
-      SampleInput	      off
-      SampleTime	      "-1"
-    }
-    Block {
-      BlockType		      Sin
-      SineType		      "Time based"
-      TimeSource	      "Use simulation time"
-      Amplitude		      "1"
-      Bias		      "0"
-      Frequency		      "1"
-      Phase		      "0"
-      Samples		      "10"
-      Offset		      "0"
-      SampleTime	      "-1"
-      VectorParams1D	      on
+      BlockType		      TransferFcn
+      Numerator		      "[1]"
+      Denominator	      "[1 2 1]"
+      AbsoluteTolerance	      "auto"
+      ContinuousStateAttributes	"''"
+      Realization	      "auto"
     }
   }
   System {
-    Name		    "roll_attitude_hold_test"
-    Location		    [-1022, 167, -241, 499]
+    Name		    "altitude_hold_using_commanded_pitch"
+    Location		    [345, 285, 1255, 615]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -734,55 +759,60 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "14"
+    SIDHighWatermark	    "12"
     Block {
-      BlockType		      Scope
-      Name		      "Actual"
-      SID		      "6"
-      Ports		      [1]
-      Position		      [645, 134, 675, 166]
-      Floating		      off
-      Location		      [-1775, 565, -1303, 969]
-      Open		      on
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
+      BlockType		      Inport
+      Name		      "Height Commanded"
+      SID		      "2"
+      Position		      [75, 158, 105, 172]
+      IconDisplay	      "Port number"
     }
     Block {
-      BlockType		      Scope
-      Name		      "Commanded"
-      SID		      "14"
-      Ports		      [1]
-      Position		      [340, 34, 370, 66]
-      Floating		      off
-      Location		      [-1283, 567, -810, 971]
-      Open		      on
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      SaveName		      "ScopeData1"
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
+      BlockType		      Inport
+      Name		      "d_h"
+      SID		      "10"
+      Position		      [563, 15, 577, 45]
+      BlockRotation	      270
+      BlockMirror	      on
+      NamePlacement	      "alternate"
+      Port		      "2"
+      IconDisplay	      "Port number"
+    }
+    Block {
+      BlockType		      Gain
+      Name		      "Gain"
+      SID		      "6"
+      Position		      [220, 149, 285, 181]
+      Gain		      "k_p_h"
+      ParamDataTypeStr	      "Inherit: Inherit via internal rule"
+      OutDataTypeStr	      "Inherit: Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
+    }
+    Block {
+      BlockType		      Gain
+      Name		      "Gain1"
+      SID		      "11"
+      Position		      [543, 70, 597, 130]
+      BlockRotation	      270
+      BlockMirror	      on
+      NamePlacement	      "alternate"
+      Gain		      "1/Va"
+      ParamDataTypeStr	      "Inherit: Inherit via internal rule"
+      OutDataTypeStr	      "Inherit: Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
     }
     Block {
       BlockType		      ModelReference
       Name		      "Model"
-      SID		      "4"
-      Ports		      [2, 1]
-      Position		      [375, 97, 585, 208]
-      ModelNameDialog	      "roll_attitude_hold"
+      SID		      "3"
+      Ports		      [1, 1]
+      Position		      [375, 123, 515, 197]
+      ModelNameDialog	      "pitch_attitude_hold"
       SimulationMode	      "Normal"
-      ModelReferenceVersion   "1.13"
+      ModelReferenceVersion   "1.6"
       List {
 	ListType		InputPortNames
 	port0			"Theta Commanded"
-	port1			"d_theta_2"
       }
       List {
 	ListType		OutputPortNames
@@ -792,104 +822,156 @@ Model {
 	ListType		OutputPortOutputBusAsStructs
 	port0			"off"
       }
-      CopyOfModelName	      "roll_attitude_hold"
+      List {
+	ListType		InputPortLatchByCopyingInsideSignal
+	port0			"off"
+      }
+      CopyOfModelName	      "pitch_attitude_hold"
       DefaultDataLogging      on
+      List {
+	ListType		InputPortLatchByDelayingOutsideSignal
+	port0			"off"
+      }
     }
     Block {
-      BlockType		      Product
-      Name		      "Product"
-      SID		      "11"
+      BlockType		      Sum
+      Name		      "Sum"
+      SID		      "4"
       Ports		      [2, 1]
-      Position		      [300, 197, 330, 228]
+      Position		      [150, 155, 170, 175]
+      ShowName		      off
+      IconShape		      "round"
+      Inputs		      "|+-"
       InputSameDT	      off
       OutDataTypeStr	      "Inherit: Inherit via internal rule"
       SaturateOnIntegerOverflow	off
     }
     Block {
-      BlockType		      RandomNumber
-      Name		      "Random\nNumber"
-      SID		      "10"
-      Position		      [145, 235, 175, 265]
-      Variance		      "5"
-      SampleTime	      "0.1"
+      BlockType		      Sum
+      Name		      "Sum1"
+      SID		      "5"
+      Ports		      [2, 1]
+      Position		      [310, 155, 330, 175]
+      ShowName		      off
+      IconShape		      "round"
+      Inputs		      "++|"
+      InputSameDT	      off
+      OutDataTypeStr	      "Inherit: Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
     }
     Block {
-      BlockType		      RateTransition
-      Name		      "Rate Transition"
-      SID		      "12"
-      Position		      [225, 229, 265, 271]
+      BlockType		      Sum
+      Name		      "Sum2"
+      SID		      "9"
+      Ports		      [2, 1]
+      Position		      [560, 155, 580, 175]
+      ShowName		      off
+      IconShape		      "round"
+      Inputs		      "++|"
+      InputSameDT	      off
+      OutDataTypeStr	      "Inherit: Inherit via internal rule"
+      SaturateOnIntegerOverflow	off
     }
     Block {
-      BlockType		      Sin
-      Name		      "Sine Wave"
+      BlockType		      TransferFcn
+      Name		      "Transfer Fcn"
+      SID		      "7"
+      Position		      [220, 67, 280, 103]
+      Numerator		      "[k_i_h]"
+      Denominator	      "[1 0]"
+    }
+    Block {
+      BlockType		      TransferFcn
+      Name		      "Transfer Fcn1"
       SID		      "8"
-      Ports		      [0, 1]
-      Position		      [145, 165, 175, 195]
-      Amplitude		      "300"
-      Frequency		      "10"
-      Phase		      "pi/2"
-      SampleTime	      "0"
+      Position		      [630, 147, 690, 183]
+      Numerator		      "[Va]"
+      Denominator	      "[1 0]"
     }
     Block {
-      BlockType		      Sin
-      Name		      "Sine Wave1"
-      SID		      "13"
-      Ports		      [0, 1]
-      Position		      [280, 110, 310, 140]
-      SampleTime	      "0"
+      BlockType		      Outport
+      Name		      "Height"
+      SID		      "1"
+      Position		      [760, 158, 790, 172]
+      IconDisplay	      "Port number"
     }
     Line {
-      SrcBlock		      "Sine Wave1"
+      SrcBlock		      "Height Commanded"
       SrcPort		      1
-      Points		      [5, 0]
+      DstBlock		      "Sum"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Sum"
+      SrcPort		      1
+      Points		      [15, 0]
       Branch {
-	DstBlock		"Model"
+	DstBlock		"Gain"
 	DstPort			1
       }
       Branch {
-	Points			[0, -75]
-	DstBlock		"Commanded"
+	Points			[0, -80]
+	DstBlock		"Transfer Fcn"
 	DstPort			1
       }
+    }
+    Line {
+      SrcBlock		      "Sum1"
+      SrcPort		      1
+      DstBlock		      "Model"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Transfer Fcn"
+      SrcPort		      1
+      Points		      [35, 0]
+      DstBlock		      "Sum1"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Gain"
+      SrcPort		      1
+      DstBlock		      "Sum1"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "Transfer Fcn1"
+      SrcPort		      1
+      Points		      [30, 0]
+      Branch {
+	DstBlock		"Height"
+	DstPort			1
+      }
+      Branch {
+	Points			[0, 80; -565, 0]
+	DstBlock		"Sum"
+	DstPort			2
+      }
+    }
+    Line {
+      SrcBlock		      "d_h"
+      SrcPort		      1
+      DstBlock		      "Gain1"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Gain1"
+      SrcPort		      1
+      DstBlock		      "Sum2"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Sum2"
+      SrcPort		      1
+      DstBlock		      "Transfer Fcn1"
+      DstPort		      1
     }
     Line {
       SrcBlock		      "Model"
       SrcPort		      1
-      DstBlock		      "Actual"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "Sine Wave"
-      SrcPort		      1
-      Points		      [100, 0; 0, 25]
-      DstBlock		      "Product"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "Product"
-      SrcPort		      1
-      Points		      [10, 0; 0, -35]
-      DstBlock		      "Model"
+      Points		      [10, 0; 0, 5]
+      DstBlock		      "Sum2"
       DstPort		      2
-    }
-    Line {
-      SrcBlock		      "Random\nNumber"
-      SrcPort		      1
-      DstBlock		      "Rate Transition"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "Rate Transition"
-      SrcPort		      1
-      Points		      [5, 0; 0, -30]
-      DstBlock		      "Product"
-      DstPort		      2
-    }
-    Annotation {
-      Position		      [161, 174]
-    }
-    Annotation {
-      Position		      [157, 188]
     }
   }
 }

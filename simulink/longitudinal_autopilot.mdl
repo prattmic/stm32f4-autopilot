@@ -1,16 +1,13 @@
 Model {
-  Name			  "roll_attitude_hold_test"
+  Name			  "longitudinal_autopilot"
   Version		  7.7
   MdlSubVersion		  0
   GraphicalInterface {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.10"
-    NumModelReferences	    1
-    ModelReference {
-      ModelRefBlockPath	      "roll_attitude_hold_test/Model|roll_attitude_hold"
-    }
+    ComputedModelVersion    "1.3"
+    NumModelReferences	    0
     NumTestPointedSignals   0
   }
   SavedCharacterEncoding  "windows-1252"
@@ -23,15 +20,15 @@ Model {
   MinMaxOverflowLogging	  "UseLocalSettings"
   MinMaxOverflowArchiveMode "Overwrite"
   MaxMDLFileLineLength	  120
-  Created		  "Tue Jun 19 15:45:15 2012"
-  Creator		  "prattmic"
+  Created		  "Wed Jun 20 01:28:37 2012"
+  Creator		  "mdpratt"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "prattmic"
+  LastModifiedBy	  "mdpratt"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Jun 19 23:24:04 2012"
-  RTWModifiedTimeStamp	  262048491
-  ModelVersionFormat	  "1.%<AutoIncrement:10>"
+  LastModifiedDate	  "Wed Jun 20 02:00:07 2012"
+  RTWModifiedTimeStamp	  262056522
+  ModelVersionFormat	  "1.%<AutoIncrement:3>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -67,13 +64,13 @@ Model {
     $PropName		    "DataLoggingOverride"
     $ObjectID		    1
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
-    model_		    "roll_attitude_hold_test"
+    model_		    "longitudinal_autopilot"
     signals_		    []
-    overrideMode_	    [0.0]
+    overrideMode_	    [0U]
     Array {
       Type		      "Cell"
       Dimension		      1
-      Cell		      "roll_attitude_hold_test"
+      Cell		      "longitudinal_autopilot"
       PropName		      "logAsSpecifiedByModels_"
     }
     Array {
@@ -151,8 +148,8 @@ Model {
 	  RelTol		  "1e-3"
 	  SolverMode		  "Auto"
 	  ConcurrentTasks	  off
-	  Solver		  "ode3"
-	  SolverName		  "ode3"
+	  Solver		  "ode45"
+	  SolverName		  "ode45"
 	  SolverJacobianMethodControl "auto"
 	  ShapePreserveControl	  "DisableAll"
 	  ZeroCrossControl	  "UseLocalSettings"
@@ -347,13 +344,13 @@ Model {
 	  ProdBitPerFloat	  32
 	  ProdBitPerDouble	  64
 	  ProdBitPerPointer	  32
-	  ProdLargestAtomicInteger "Long"
-	  ProdLargestAtomicFloat  "Double"
+	  ProdLargestAtomicInteger "Char"
+	  ProdLargestAtomicFloat  "None"
 	  ProdIntDivRoundTo	  "Undefined"
-	  ProdEndianess		  "LittleEndian"
+	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
 	  ProdShiftRightIntArith  on
-	  ProdHWDeviceType	  "ARM Compatible->ARM Cortex"
+	  ProdHWDeviceType	  "32-bit Generic"
 	  TargetBitPerChar	  8
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
@@ -421,7 +418,7 @@ Model {
 	    PropName		    "DisabledProps"
 	  }
 	  SystemTargetFile	  "grt.tlc"
-	  GenCodeOnly		  on
+	  GenCodeOnly		  off
 	  MakeCommand		  "make_rtw"
 	  GenerateMakefile	  on
 	  TemplateMakefile	  "grt_default_tmf"
@@ -650,77 +647,82 @@ Model {
   }
   BlockParameterDefaults {
     Block {
-      BlockType		      ModelReference
-      Variant		      off
-      GeneratePreprocessorConditionals off
-      CopyOfModelProtected    off
+      BlockType		      Demux
+      Outputs		      "4"
+      DisplayOption	      "none"
+      BusSelectionMode	      off
     }
     Block {
-      BlockType		      Product
-      Inputs		      "2"
-      Multiplication	      "Element-wise(.*)"
-      CollapseMode	      "All dimensions"
-      CollapseDim	      "1"
-      InputSameDT	      on
+      BlockType		      Inport
+      Port		      "1"
+      OutputFunctionCall      off
       OutMin		      "[]"
       OutMax		      "[]"
-      OutDataTypeStr	      "Inherit: Same as first input"
+      OutDataTypeStr	      "Inherit: auto"
       LockScale		      off
-      RndMeth		      "Zero"
-      SaturateOnIntegerOverflow	on
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
       SampleTime	      "-1"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      LatchByDelayingOutsideSignal off
+      LatchInputForFeedbackSignals off
+      Interpolate	      on
     }
     Block {
-      BlockType		      RandomNumber
-      Mean		      "0"
-      Variance		      "1"
-      Seed		      "0"
+      BlockType		      Outport
+      Port		      "1"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
       SampleTime	      "-1"
-      VectorParams1D	      on
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      SourceOfInitialOutputValue "Dialog"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
     }
     Block {
-      BlockType		      RateTransition
-      Integrity		      on
-      Deterministic	      on
-      X0		      "0"
-      OutPortSampleTimeOpt    "Specify"
-      OutPortSampleTimeMultiple	"1"
-      OutPortSampleTime	      "-1"
+      BlockType		      S-Function
+      FunctionName	      "system"
+      SFunctionModules	      "''"
+      PortCounts	      "[]"
+      SFunctionDeploymentMode off
     }
     Block {
-      BlockType		      Scope
-      ModelBased	      off
-      TickLabels	      "OneTimeTick"
-      ZoomMode		      "on"
-      Grid		      "on"
-      TimeRange		      "auto"
-      YMin		      "-5"
-      YMax		      "5"
-      SaveToWorkspace	      off
-      SaveName		      "ScopeData"
-      LimitDataPoints	      on
-      MaxDataPoints	      "5000"
-      Decimation	      "1"
-      SampleInput	      off
-      SampleTime	      "-1"
+      BlockType		      SubSystem
+      ShowPortLabels	      "FromPortIcon"
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      TreatAsAtomicUnit	      off
+      CheckFcnCallInpInsideContextMsg off
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      DataTypeOverrideAppliesTo	"AllNumericTypes"
+      MinMaxOverflowLogging   "UseLocalSettings"
+      Variant		      off
+      GeneratePreprocessorConditionals off
     }
     Block {
-      BlockType		      Sin
-      SineType		      "Time based"
-      TimeSource	      "Use simulation time"
-      Amplitude		      "1"
-      Bias		      "0"
-      Frequency		      "1"
-      Phase		      "0"
-      Samples		      "10"
-      Offset		      "0"
-      SampleTime	      "-1"
-      VectorParams1D	      on
+      BlockType		      Terminator
     }
   }
   System {
-    Name		    "roll_attitude_hold_test"
-    Location		    [-1022, 167, -241, 499]
+    Name		    "longitudinal_autopilot"
+    Location		    [701, 239, 1408, 626]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -734,162 +736,400 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "14"
+    SIDHighWatermark	    "11"
     Block {
-      BlockType		      Scope
-      Name		      "Actual"
-      SID		      "6"
-      Ports		      [1]
-      Position		      [645, 134, 675, 166]
-      Floating		      off
-      Location		      [-1775, 565, -1303, 969]
-      Open		      on
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Scope
-      Name		      "Commanded"
-      SID		      "14"
-      Ports		      [1]
-      Position		      [340, 34, 370, 66]
-      Floating		      off
-      Location		      [-1283, 567, -810, 971]
-      Open		      on
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      SaveName		      "ScopeData1"
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      ModelReference
-      Name		      "Model"
-      SID		      "4"
+      BlockType		      SubSystem
+      Name		      "Chart"
+      SID		      "1"
       Ports		      [2, 1]
-      Position		      [375, 97, 585, 208]
-      ModelNameDialog	      "roll_attitude_hold"
-      SimulationMode	      "Normal"
-      ModelReferenceVersion   "1.13"
-      List {
-	ListType		InputPortNames
-	port0			"Theta Commanded"
-	port1			"d_theta_2"
+      Position		      [85, 67, 205, 178]
+      LibraryVersion	      "1.235"
+      ErrorFcn		      "Stateflow.Translate.translate"
+      PermitHierarchicalResolution "ExplicitOnly"
+      TreatAsAtomicUnit	      on
+      MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
+      RTWSystemCode	      "Auto"
+      FunctionWithSeparateData off
+      Opaque		      off
+      RequestExecContextInheritance off
+      MaskHideContents	      off
+      MaskType		      "Stateflow"
+      MaskDescription	      "Stateflow diagram"
+      MaskSelfModifiable      on
+      MaskDisplay	      "plot(sf('Private','sfblk','xIcon'),sf('Private','sfblk','yIcon'));text(0.5,0,sf('Private', 's"
+      "fblk', 'tIcon'),'HorizontalAl','Center','VerticalAl','Bottom');"
+      MaskIconFrame	      off
+      MaskIconOpaque	      off
+      MaskIconRotate	      "none"
+      MaskPortRotate	      "default"
+      MaskIconUnits	      "autoscale"
+      System {
+	Name			"Chart"
+	Location		[257, 457, 812, 717]
+	Open			off
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
+	TiledPageScale		1
+	ShowPageBoundaries	off
+	ZoomFactor		"100"
+	SIDHighWatermark	"22"
+	Block {
+	  BlockType		  Inport
+	  Name			  "h"
+	  SID			  "1::17"
+	  Position		  [20, 101, 40, 119]
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "h_c"
+	  SID			  "1::18"
+	  Position		  [20, 136, 40, 154]
+	  Port			  "2"
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Demux
+	  Name			  " Demux "
+	  SID			  "1::14"
+	  Ports			  [1, 1]
+	  Position		  [270, 160, 320, 200]
+	  Outputs		  "1"
+	}
+	Block {
+	  BlockType		  S-Function
+	  Name			  " SFunction "
+	  SID			  "1::13"
+	  Tag			  "Stateflow S-Function longitudinal_autopilot 1"
+	  Ports			  [2, 2]
+	  Position		  [180, 100, 230, 160]
+	  FunctionName		  "sf_sfun"
+	  PortCounts		  "[2 2]"
+	  EnableBusSupport	  off
+	  Port {
+	    PortNumber		    2
+	    Name		    "delta_t"
+	    RTWStorageClass	    "Auto"
+	    DataLoggingNameMode	    "SignalName"
+	  }
+	}
+	Block {
+	  BlockType		  Terminator
+	  Name			  " Terminator "
+	  SID			  "1::22"
+	  Position		  [460, 171, 480, 189]
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "delta_t"
+	  SID			  "1::19"
+	  Position		  [460, 101, 480, 119]
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  SrcBlock		  "h"
+	  SrcPort		  1
+	  DstBlock		  " SFunction "
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "h_c"
+	  SrcPort		  1
+	  DstBlock		  " SFunction "
+	  DstPort		  2
+	}
+	Line {
+	  Name			  "delta_t"
+	  Labels		  [0, 0; 0, 0]
+	  SrcBlock		  " SFunction "
+	  SrcPort		  2
+	  DstBlock		  "delta_t"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  " Demux "
+	  SrcPort		  1
+	  DstBlock		  " Terminator "
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  " SFunction "
+	  SrcPort		  1
+	  DstBlock		  " Demux "
+	  DstPort		  1
+	}
       }
-      List {
-	ListType		OutputPortNames
-	port0			"Theta"
+    }
+  }
+}
+# Finite State Machines
+#
+#    Stateflow Version 7.5 (R2010a) dated Mar  5 2011, 00:01:50
+#
+#
+
+
+Stateflow {
+  machine {
+    id			    1
+    name		    "longitudinal_autopilot"
+    created		    "20-Jun-2012 01:28:37"
+    isLibrary		    0
+    firstTarget		    15
+    sfVersion		    75014001
+  }
+  chart {
+    id			    2
+    name		    "Chart"
+    windowPosition	    [0 21 1200 603.75]
+    viewLimits		    [11.938 1168.438 0 567.75]
+    screen		    [1 1 1600 900 1.333333333333333]
+    treeNode		    [0 5 0 0]
+    firstTransition	    10
+    viewObj		    2
+    machine		    1
+    subviewS {
+    }
+    ssIdHighWaterMark	    16
+    decomposition	    CLUSTER_CHART
+    firstData		    11
+    chartFileNumber	    1
+    userSpecifiedStateTransitionExecutionOrder 1
+    disableImplicitCasting  1
+  }
+  state {
+    id			    3
+    labelString		    "Climb zone\nduring: delta_t =1;"
+    position		    [427.375 375 325.625 133.875]
+    fontSize		    12
+    chart		    2
+    treeNode		    [2 0 4 0]
+    subviewer		    2
+    ssIdNumber		    1
+    type		    OR_STATE
+    decomposition	    CLUSTER_STATE
+  }
+  state {
+    id			    4
+    labelString		    "Altitude hold zone"
+    position		    [426.375 193.5 312.875 119.625]
+    fontSize		    12
+    chart		    2
+    treeNode		    [2 0 5 3]
+    subviewer		    2
+    ssIdNumber		    2
+    type		    OR_STATE
+    decomposition	    CLUSTER_STATE
+  }
+  state {
+    id			    5
+    labelString		    "Descend zone\nduring: delta_t = 0;"
+    position		    [423.9375 24.5625 312.875 119.625]
+    fontSize		    12
+    chart		    2
+    treeNode		    [2 0 0 4]
+    subviewer		    2
+    ssIdNumber		    3
+    type		    OR_STATE
+    decomposition	    CLUSTER_STATE
+  }
+  transition {
+    id			    6
+    labelString		    "[h >= h_c - delta_h_bar]"
+    labelPosition	    [656.688 319.5 123.69 14.971]
+    fontSize		    12
+    src {
+      id		      3
+      intersection	      [1 0 -1 0.6996 655.1875 375 0 72.375]
+    }
+    dst {
+      id		      4
+      intersection	      [3 0 1 0.2687 655.1875 313.125 0 -72.375]
+    }
+    midPoint		    [655.1875 346.9781]
+    chart		    2
+    linkNode		    [2 8 7]
+    dataLimits		    [652.788 657.588 313.125 375]
+    stampAngle		    NaN
+    subviewer		    2
+    drawStyle		    SMART
+    slide {
+    }
+    executionOrder	    1
+    ssIdNumber		    7
+  }
+  transition {
+    id			    7
+    labelPosition	    [405.245 430.5 8.246 14.971]
+    fontSize		    12
+    src {
+      intersection	      [0 1 0 0 397.375 445.5 0 0]
+    }
+    dst {
+      id		      3
+      intersection	      [4 -1 0 0.4734 427.375 445.5 0 0]
+    }
+    midPoint		    [408.7665 445.5]
+    chart		    2
+    linkNode		    [2 6 0]
+    dataLimits		    [397.375 427.375 443.1 447.9]
+    subviewer		    2
+    drawStyle		    SMART
+    executionOrder	    1
+    ssIdNumber		    8
+  }
+  transition {
+    id			    8
+    labelString		    "[h < h_c - delta_h_bar]"
+    labelPosition	    [392.813 321.375 116.943 14.971]
+    fontSize		    12
+    src {
+      id		      4
+      intersection	      [3 0 1 0.7337 509.6875 313.125 0 73.125]
+    }
+    dst {
+      id		      3
+      intersection	      [1 0 -1 0.2528 509.6875 375 0 -73.125]
+    }
+    midPoint		    [509.6875 341.1469]
+    chart		    2
+    linkNode		    [2 9 6]
+    dataLimits		    [507.288 512.088 313.125 375]
+    stampAngle		    NaN
+    subviewer		    2
+    drawStyle		    SMART
+    slide {
+    }
+    executionOrder	    1
+    ssIdNumber		    9
+  }
+  transition {
+    id			    9
+    labelString		    "[h >= h_c + delta_h_bar]"
+    labelPosition	    [659.188 150.75 126.689 14.971]
+    fontSize		    12
+    src {
+      id		      4
+      intersection	      [1 0 -1 0.7337 655.9375 193.5 0 73.125]
+    }
+    dst {
+      id		      5
+      intersection	      [3 -0 1 0.2585 655.9375 144.1875 0 -73.125]
+    }
+    midPoint		    [655.9375 172.0324]
+    chart		    2
+    linkNode		    [2 10 8]
+    dataLimits		    [653.538 658.338 144.188 193.5]
+    stampAngle		    NaN
+    subviewer		    2
+    drawStyle		    SMART
+    slide {
+    }
+    executionOrder	    2
+    ssIdNumber		    12
+  }
+  transition {
+    id			    10
+    labelString		    "[h < h_c + delta_h_bar]"
+    labelPosition	    [389.813 150.375 119.942 14.971]
+    fontSize		    12
+    src {
+      id		      5
+      intersection	      [3 -0 1 0.7187 511.9375 144.1875 0 68.4375]
+    }
+    dst {
+      id		      4
+      intersection	      [1 0 -1 0.2735 511.9375 193.5 0 -68.4375]
+    }
+    midPoint		    [511.9375 165.6551]
+    chart		    2
+    linkNode		    [2 0 9]
+    dataLimits		    [509.538 514.338 144.188 193.5]
+    stampAngle		    NaN
+    subviewer		    2
+    drawStyle		    SMART
+    slide {
+    }
+    executionOrder	    1
+    ssIdNumber		    13
+  }
+  data {
+    id			    11
+    ssIdNumber		    5
+    name		    "h"
+    linkNode		    [2 0 12]
+    scope		    INPUT_DATA
+    machine		    1
+    props {
+      array {
+	size			"-1"
       }
-      List {
-	ListType		OutputPortOutputBusAsStructs
-	port0			"off"
+      type {
+	method			SF_INHERITED_TYPE
+	primitive		SF_DOUBLE_TYPE
+	isSigned		1
+	wordLength		"16"
       }
-      CopyOfModelName	      "roll_attitude_hold"
-      DefaultDataLogging      on
+      frame		      SF_FRAME_INHERITED
     }
-    Block {
-      BlockType		      Product
-      Name		      "Product"
-      SID		      "11"
-      Ports		      [2, 1]
-      Position		      [300, 197, 330, 228]
-      InputSameDT	      off
-      OutDataTypeStr	      "Inherit: Inherit via internal rule"
-      SaturateOnIntegerOverflow	off
-    }
-    Block {
-      BlockType		      RandomNumber
-      Name		      "Random\nNumber"
-      SID		      "10"
-      Position		      [145, 235, 175, 265]
-      Variance		      "5"
-      SampleTime	      "0.1"
-    }
-    Block {
-      BlockType		      RateTransition
-      Name		      "Rate Transition"
-      SID		      "12"
-      Position		      [225, 229, 265, 271]
-    }
-    Block {
-      BlockType		      Sin
-      Name		      "Sine Wave"
-      SID		      "8"
-      Ports		      [0, 1]
-      Position		      [145, 165, 175, 195]
-      Amplitude		      "300"
-      Frequency		      "10"
-      Phase		      "pi/2"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Sin
-      Name		      "Sine Wave1"
-      SID		      "13"
-      Ports		      [0, 1]
-      Position		      [280, 110, 310, 140]
-      SampleTime	      "0"
-    }
-    Line {
-      SrcBlock		      "Sine Wave1"
-      SrcPort		      1
-      Points		      [5, 0]
-      Branch {
-	DstBlock		"Model"
-	DstPort			1
+    dataType		    "Inherit: Same as Simulink"
+  }
+  data {
+    id			    12
+    ssIdNumber		    14
+    name		    "h_c"
+    linkNode		    [2 11 13]
+    scope		    INPUT_DATA
+    machine		    1
+    props {
+      array {
+	size			"-1"
       }
-      Branch {
-	Points			[0, -75]
-	DstBlock		"Commanded"
-	DstPort			1
+      type {
+	method			SF_INHERITED_TYPE
+	primitive		SF_DOUBLE_TYPE
+	isSigned		1
+	wordLength		"16"
       }
+      frame		      SF_FRAME_INHERITED
     }
-    Line {
-      SrcBlock		      "Model"
-      SrcPort		      1
-      DstBlock		      "Actual"
-      DstPort		      1
+    dataType		    "Inherit: Same as Simulink"
+  }
+  data {
+    id			    13
+    ssIdNumber		    15
+    name		    "delta_t"
+    linkNode		    [2 12 0]
+    scope		    OUTPUT_DATA
+    machine		    1
+    props {
+      type {
+	primitive		SF_DOUBLE_TYPE
+	isSigned		1
+	wordLength		"16"
+      }
+      frame		      SF_FRAME_NO
     }
-    Line {
-      SrcBlock		      "Sine Wave"
-      SrcPort		      1
-      Points		      [100, 0; 0, 25]
-      DstBlock		      "Product"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "Product"
-      SrcPort		      1
-      Points		      [10, 0; 0, -35]
-      DstBlock		      "Model"
-      DstPort		      2
-    }
-    Line {
-      SrcBlock		      "Random\nNumber"
-      SrcPort		      1
-      DstBlock		      "Rate Transition"
-      DstPort		      1
-    }
-    Line {
-      SrcBlock		      "Rate Transition"
-      SrcPort		      1
-      Points		      [5, 0; 0, -30]
-      DstBlock		      "Product"
-      DstPort		      2
-    }
-    Annotation {
-      Position		      [161, 174]
-    }
-    Annotation {
-      Position		      [157, 188]
-    }
+    dataType		    "double"
+  }
+  instance {
+    id			    14
+    name		    "Chart"
+    machine		    1
+    chart		    2
+  }
+  target {
+    id			    15
+    name		    "sfun"
+    description		    "Default Simulink S-Function Target."
+    machine		    1
+    linkNode		    [1 0 0]
   }
 }
